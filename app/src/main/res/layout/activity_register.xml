@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_background"
+    android:fillViewport="true"
+    tools:context=".RegisterActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="32dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/register_title"
+            android:textColor="@color/md_on_surface"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/register_subtitle"
+            android:textColor="@color/md_on_surface_variant"
+            android:textSize="14sp" />
+
+        <!-- Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_card_container"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Name -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/register_name_label"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/name_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input_rounded"
+                    android:hint="@string/register_name_hint"
+                    android:inputType="textPersonName"
+                    android:paddingStart="48dp"
+                    android:paddingEnd="16dp"
+                    android:textColorHint="@color/md_on_surface_variant"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_person"
+                    app:tint="@color/md_outline" />
+            </FrameLayout>
+
+            <!-- Email -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/register_email_label"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/email_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input_rounded"
+                    android:hint="@string/login_email_hint"
+                    android:inputType="textEmailAddress"
+                    android:paddingStart="48dp"
+                    android:paddingEnd="16dp"
+                    android:textColorHint="@color/md_on_surface_variant"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_alternate_email"
+                    app:tint="@color/md_outline" />
+            </FrameLayout>
+
+            <!-- Master password -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/register_master_password"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/password_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input_rounded"
+                    android:hint="@string/login_password_hint"
+                    android:inputType="textPassword"
+                    android:paddingStart="48dp"
+                    android:paddingEnd="48dp"
+                    android:textColorHint="@color/md_on_surface_variant"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_lock"
+                    app:tint="@color/md_outline" />
+
+                <ImageButton
+                    android:id="@+id/toggle_password_btn"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center_vertical|end"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_visibility"
+                    app:tint="@color/md_outline" />
+            </FrameLayout>
+
+            <!-- Strength meter -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/strength_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/register_strength_none"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/strength_percent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0%"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_strength_track_light">
+
+                <View
+                    android:id="@+id/strength_bar"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_strength_error" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/register_password_hint"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="11sp" />
+
+            <!-- Confirm password -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/register_confirm_password"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/confirm_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input_rounded"
+                    android:hint="@string/login_password_hint"
+                    android:inputType="textPassword"
+                    android:paddingStart="48dp"
+                    android:paddingEnd="48dp"
+                    android:textColorHint="@color/md_on_surface_variant"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_verified_user"
+                    app:tint="@color/md_outline" />
+
+                <ImageButton
+                    android:id="@+id/toggle_confirm_btn"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center_vertical|end"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_visibility"
+                    app:tint="@color/md_outline" />
+            </FrameLayout>
+
+            <!-- Register button -->
+            <Button
+                android:id="@+id/register_btn"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_btn_pill_primary"
+                android:drawableEnd="@drawable/ic_arrow_forward"
+                android:drawableTint="@color/md_on_primary"
+                android:paddingEnd="24dp"
+                android:stateListAnimator="@null"
+                android:text="@string/register_button"
+                android:textAllCaps="false"
+                android:textColor="@color/md_on_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Bottom actions -->
+        <TextView
+            android:id="@+id/back_to_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:drawableStart="@drawable/ic_arrow_back"
+            android:drawableTint="@color/md_primary"
+            android:gravity="center_vertical"
+            android:text="@string/register_back_to_login"
+            android:textColor="@color/md_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="64dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/md_outline_variant" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:text="@string/register_or"
+                android:textColor="@color/md_outline"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/md_outline_variant" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/register_terms_notice"
+            android:textColor="@color/md_on_surface_variant"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>
