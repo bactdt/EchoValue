@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark variants (basic dark mode support) -->
+    <color name="md_primary_dark">#FFBDC2FF</color>
+    <color name="md_on_primary_dark">#FF000767</color>
+    <color name="md_primary_container_dark">#FF343D96</color>
+    <color name="md_on_primary_container_dark">#FFE0E0FF</color>
+
+    <color name="md_background_dark">#FF111318</color>
+    <color name="md_on_background_dark">#FFE2E2E9</color>
+    <color name="md_surface_dark">#FF111318</color>
+    <color name="md_on_surface_dark">#FFE2E2E9</color>
+    <color name="md_surface_variant_dark">#FF44474F</color>
+    <color name="md_on_surface_variant_dark">#FFC4C6D0</color>
+    <color name="md_surface_container_lowest_dark">#FF0B0C10</color>
+    <color name="md_surface_container_low_dark">#FF191C1F</color>
+    <color name="md_surface_container_dark">#FF1D2024</color>
+    <color name="md_surface_container_high_dark">#FF282A2E</color>
+    <color name="md_surface_container_highest_dark">#FF333539</color>
+
+    <color name="md_outline_dark">#FF8E9099</color>
+    <color name="md_outline_variant_dark">#FF44474F</color>
+</resources>

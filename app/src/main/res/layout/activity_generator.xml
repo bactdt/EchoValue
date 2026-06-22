@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_background">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="56dp"
+            android:paddingHorizontal="16dp">
+
+            <!-- Top app bar -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="-56dp"
+                android:background="@color/md_surface"
+                android:paddingHorizontal="8dp">
+
+                <ImageButton
+                    android:id="@+id/back_btn"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_back" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/back_btn"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_shield"
+                        app:tint="@color/md_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/login_title"
+                        android:textColor="@color/md_primary"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/search_btn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/md_on_surface_variant" />
+            </RelativeLayout>
+
+            <!-- Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/generator_title"
+                android:textColor="@color/md_on_surface"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/generator_subtitle"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="14sp" />
+
+            <!-- Display card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_card_high"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:id="@+id/password_display"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_card_elevated"
+                    android:gravity="center"
+                    android:minHeight="80dp"
+                    android:padding="16dp"
+                    android:fontFamily="monospace"
+                    android:text="••••••••••••••••"
+                    android:textColor="@color/md_primary"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    tools:text="A7b9!xY_pQ2R" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/copy_btn"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_pill_primary"
+                        android:drawableStart="@drawable/ic_content_copy"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="@color/md_on_primary"
+                        android:paddingStart="24dp"
+                        android:stateListAnimator="@null"
+                        android:text="@string/generator_copy"
+                        android:textAllCaps="false"
+                        android:textColor="@color/md_on_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/regenerate_btn"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_icon_circle_secondary"
+                        android:src="@drawable/ic_refresh" />
+                </LinearLayout>
+
+                <!-- Strength -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingHorizontal="4dp"
+                        android:text="@string/generator_strength"
+                        android:textColor="@color/md_on_surface_variant"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/strength_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="4dp"
+                        android:text="@string/generator_strength_strong"
+                        android:textColor="@color/md_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_strength_track">
+
+                    <View
+                        android:id="@+id/strength_bar"
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_strength_primary" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- Configuration card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_card_container"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <!-- Length slider -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/generator_length"
+                        android:textColor="@color/md_on_surface"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/length_value"
+                        android:layout_width="48dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:text="16"
+                        android:textColor="@color/md_primary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/length_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:max="56"
+                    android:progress="16"
+                    android:progressTint="@color/md_primary"
+                    android:thumbTint="@color/md_primary" />
+
+                <!-- Toggles -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
+
+                    <include
+                        android:id="@+id/row_upper"
+                        layout="@layout/item_generator_toggle" />
+
+                    <include
+                        android:id="@+id/row_lower"
+                        layout="@layout/item_generator_toggle" />
+
+                    <include
+                        android:id="@+id/row_numbers"
+                        layout="@layout/item_generator_toggle" />
+
+                    <include
+                        android:id="@+id/row_symbols"
+                        layout="@layout/item_generator_toggle" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom nav -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_gravity="bottom"
+        android:background="@color/md_surface_container_low"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/nav_vault"
+            style="@style/BottomNavItem"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_lock"
+                app:tint="@color/md_on_surface_variant" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/nav_vault"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_generator"
+            style="@style/BottomNavItemActive"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_password"
+                app:tint="@color/md_on_secondary_container" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/nav_generator"
+                android:textColor="@color/md_on_secondary_container"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_security"
+            style="@style/BottomNavItem"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_verified_user"
+                app:tint="@color/md_on_surface_variant" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/nav_security"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_settings"
+            style="@style/BottomNavItem"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_settings"
+                app:tint="@color/md_on_surface_variant" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/nav_settings"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
