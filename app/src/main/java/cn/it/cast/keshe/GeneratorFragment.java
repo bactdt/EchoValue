@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import cn.it.cast.keshe.util.ClipboardUtil;
@@ -48,7 +49,7 @@ public class GeneratorFragment extends Fragment {
         generate();
 
         MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarForTab(getString(R.string.nav_generator));
+        callback.setToolbarTitle(getString(R.string.nav_generator), false, false);
         callback.setFabVisible(false);
     }
 
@@ -169,6 +170,6 @@ public class GeneratorFragment extends Fragment {
         lp.width = Math.max(8, (int) (parentWidth * (score / 100f)));
         strengthBar.setLayoutParams(lp);
         strengthLabel.setText(text);
-        strengthLabel.setTextColor(requireContext().getColor(color, requireContext().getTheme()));
+        strengthLabel.setTextColor(ContextCompat.getColor(requireContext(), color));
     }
 }

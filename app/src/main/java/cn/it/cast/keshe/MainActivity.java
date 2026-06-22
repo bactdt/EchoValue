@@ -4,34 +4,42 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
-import java.util.List;
 import java.util.Locale;
 
-import cn.it.cast.keshe.adapter.CredentialAdapter;
 import cn.it.cast.keshe.data.CredentialRepository;
-import cn.it.cast.keshe.model.Credential;
 import cn.it.cast.keshe.util.SessionManager;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityCallback {
 
-    private static final int REQ_ADD = 1;
-    private static final int REQ_DETAIL = 2;
+    private Fragment[] fragments;
+    private int currentTab = 0;
+    private static final int TAB_VAULT = 0;
+    private static final int TAB_GENERATOR = 1;
+    private static final int TAB_SECURITY = 2;
+    private static final int TAB_SETTINGS = 3;
 
-    private CredentialRepository repository;
-    private CredentialAdapter adapter;
-    private TextView scoreValue;
-    private TextView scoreHint;
-    private View scoreProgress;
-    private TextView statSavedCount;
-    private LinearLayout emptyState;
+    private View fabContainer;
+    private TextView topBarTitle;
+    private View searchBtn;
+    private View avatarContainer;
     private TextView avatarText;
+    private View bottomNav;
+    private View[] navItems = new View[4];
+    private ImageView[] navIcons = new ImageView[4];
+    private TextView[] navLabels = new TextView[4];
+
+    private ActivityResultLauncher<Intent> addCredentialLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,136 +66,132 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-
-        repository = new CredentialRepository(this);
-        repository.setMasterPassword(VaultApp.getMasterPassword());
-
         bindViews();
-        wireEvents();
 
-        if (repository.count() == 0) {
-            seedSampleCredentials();
+        // 注册 ActivityResultLauncher（替代 startActivityForResult）
+        addCredentialLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == RESULT_OK && currentTab == TAB_VAULT) {
+                        VaultFragment vf = (VaultFragment) fragments[TAB_VAULT];
+                        if (vf != null) vf.onResume();
+                    }
+                });
+
+        // 初始化 Fragment
+        fragments = new Fragment[4];
+        fragments[TAB_VAULT] = new VaultFragment();
+        fragments[TAB_GENERATOR] = new GeneratorFragment();
+        fragments[TAB_SECURITY] = new SecurityFragment();
+        fragments[TAB_SETTINGS] = new SettingsFragment();
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.fragment_container, fragments[TAB_VAULT], "tab_vault");
+        for (int i = 1; i < fragments.length; i++) {
+            ft.add(R.id.fragment_container, fragments[i], "tab_" + i);
+            ft.hide(fragments[i]);
         }
-    }
+        ft.commit();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        refreshList();
+        // 设置导航点击
+        for (int i = 0; i < navItems.length; i++) {
+            final int tab = i;
+            navItems[i].setOnClickListener(v -> switchTab(tab));
+        }
+
+        // FAB 点击
+        fabContainer.setOnClickListener(v -> {
+            addCredentialLauncher.launch(new Intent(this, AddCredentialActivity.class));
+        });
+
+        // 搜索按钮
+        searchBtn.setOnClickListener(v ->
+                Toast.makeText(this, R.string.home_search_hint, Toast.LENGTH_SHORT).show());
+
+        // 头像
+        String name = session.getUserName();
+        if (name != null && name.length() > 0) {
+            avatarText.setText(name.substring(0, Math.min(2, name.length())).toUpperCase(Locale.ROOT));
+        }
+
+        // 更新初始 tab 样式
+        updateNavStyles(TAB_VAULT);
+        currentTab = TAB_VAULT;
     }
 
     private void bindViews() {
-        scoreValue = findViewById(R.id.score_value);
-        scoreHint = findViewById(R.id.score_hint);
-        scoreProgress = findViewById(R.id.score_progress);
-        statSavedCount = findViewById(R.id.stat_saved_count);
-        emptyState = findViewById(R.id.empty_state);
+        fabContainer = findViewById(R.id.fab_container);
+        topBarTitle = findViewById(R.id.top_bar_title);
+        searchBtn = findViewById(R.id.search_btn);
+        avatarContainer = findViewById(R.id.avatar_container);
         avatarText = findViewById(R.id.avatar_text);
+        bottomNav = findViewById(R.id.bottom_nav);
 
-        androidx.recyclerview.widget.RecyclerView rv = findViewById(R.id.credentials_recycler);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CredentialAdapter(java.util.Collections.emptyList(), repository,
-                cred -> {
-                    Intent it = new Intent(this, PasswordDetailActivity.class);
-                    it.putExtra(PasswordDetailActivity.EXTRA_CRED_ID, cred.getId());
-                    startActivityForResult(it, REQ_DETAIL);
-                });
-        rv.setAdapter(adapter);
+        navItems[0] = findViewById(R.id.nav_vault);
+        navItems[1] = findViewById(R.id.nav_generator);
+        navItems[2] = findViewById(R.id.nav_security);
+        navItems[3] = findViewById(R.id.nav_settings);
 
-        // 头像缩写
-        SessionManager sm = new SessionManager(this);
-        String name = sm.getUserName();
-        if (name != null && name.length() > 0) {
-            String initials = name.substring(0, Math.min(2, name.length())).toUpperCase(Locale.ROOT);
-            avatarText.setText(initials);
+        for (int i = 0; i < 4; i++) {
+            navIcons[i] = navItems[i].findViewById(R.id.nav_icon);
+            navLabels[i] = navItems[i].findViewById(R.id.nav_label);
         }
     }
 
-    private void wireEvents() {
-        findViewById(R.id.fab).setOnClickListener(v -> {
-            Intent it = new Intent(this, AddCredentialActivity.class);
-            startActivityForResult(it, REQ_ADD);
-        });
+    private void switchTab(int index) {
+        if (index == currentTab) return;
 
-        findViewById(R.id.nav_generator).setOnClickListener(v ->
-                startActivity(new Intent(this, PasswordGeneratorActivity.class)));
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.hide(fragments[currentTab]);
+        ft.show(fragments[index]);
+        ft.commit();
 
-        // chip 切换样式（演示）
-        TextView[] chips = {
-                findViewById(R.id.chip_all),
-                findViewById(R.id.chip_favorites),
-                findViewById(R.id.chip_passwords),
-                findViewById(R.id.chip_notes)
-        };
-        for (TextView chip : chips) {
-            chip.setOnClickListener(v -> {
-                for (TextView c : chips) {
-                    c.setTextAppearance(R.style.FilterChipInactive);
-                    c.setBackgroundResource(R.drawable.bg_chip_inactive);
-                }
-                v.setBackgroundResource(R.drawable.bg_chip_active);
-            });
+        updateNavStyles(index);
+        currentTab = index;
+
+        // 通知 Fragment 选中
+        if (fragments[index] instanceof VaultFragment) {
+            ((VaultFragment) fragments[index]).onResume();
         }
-
-        findViewById(R.id.search_btn).setOnClickListener(v ->
-                Toast.makeText(this, R.string.home_search_hint, Toast.LENGTH_SHORT).show());
-
-        findViewById(R.id.nav_security).setOnClickListener(v ->
-                startActivity(new Intent(this, SecurityActivity.class)));
-        findViewById(R.id.nav_settings).setOnClickListener(v ->
-                startActivity(new Intent(this, SettingsActivity.class)));
-    }
-
-    private void refreshList() {
-        List<Credential> list = repository.list();
-        adapter = new CredentialAdapter(list, repository,
-                cred -> {
-                    Intent it = new Intent(this, PasswordDetailActivity.class);
-                    it.putExtra(PasswordDetailActivity.EXTRA_CRED_ID, cred.getId());
-                    startActivityForResult(it, REQ_DETAIL);
-                });
-        ((androidx.recyclerview.widget.RecyclerView) findViewById(R.id.credentials_recycler)).setAdapter(adapter);
-
-        // 统计
-        int count = list.size();
-        statSavedCount.setText(String.valueOf(count));
-        emptyState.setVisibility(count == 0 ? View.VISIBLE : View.GONE);
-
-        // 计算安全分数：简单算法（密码越多基础分越高，最大 90 + 5/凭据）
-        int score = Math.min(95, 50 + count * 5);
-        scoreValue.setText(String.valueOf(score));
-        android.view.ViewGroup.LayoutParams lp = scoreProgress.getLayoutParams();
-        int width = Math.round(getResources().getDisplayMetrics().widthPixels - 48 * 2);
-        lp.width = Math.max(40, width * score / 100);
-        scoreProgress.setLayoutParams(lp);
-
-        if (score >= 80) {
-            scoreHint.setText(R.string.home_score_good);
-        } else {
-            scoreHint.setText(getString(R.string.home_score_warning, Math.max(1, (100 - score) / 10)));
+        if (fragments[index] instanceof SecurityFragment) {
+            ((SecurityFragment) fragments[index]).onResume();
         }
     }
 
-    private void seedSampleCredentials() {
-        repository.saveNew("Google", "julian.smith@gmail.com",
-                "G00gle_Pass#2024", "https://accounts.google.com",
-                "用于个人邮箱、YouTube 和 Google Drive");
-        repository.saveNew("Bank of America", "js_investor_99",
-                "B0A_secure!2024", "https://bankofamerica.com",
-                "投资账户主登录");
-        repository.saveNew("Netflix", "family_account_main",
-                "N3tfl1x_Fam!", "https://netflix.com",
-                "家庭套餐主账户");
-        repository.saveNew("Adobe CC", "julian.smith@work.com",
-                "Ad0be_Creative#2024", "https://adobe.com",
-                "Photoshop + Illustrator 工作订阅");
+    private void updateNavStyles(int selected) {
+        for (int i = 0; i < 4; i++) {
+            boolean active = i == selected;
+            navItems[i].setBackgroundResource(0);
+            if (active) {
+                navItems[i].setBackgroundResource(R.drawable.bg_chip_active);
+            }
+            navIcons[i].setColorFilter(ContextCompat.getColor(this,
+                    active ? R.color.md_on_secondary_container : R.color.md_on_surface_variant));
+            navLabels[i].setTextColor(ContextCompat.getColor(this,
+                    active ? R.color.md_on_secondary_container : R.color.md_on_surface_variant));
+            navLabels[i].getPaint().setFakeBoldText(active);
+            navLabels[i].invalidate();
+        }
+    }
+
+    // ─── MainActivityCallback ────────────────────────────────────────────
+
+    @Override
+    public void setFabVisible(boolean visible) {
+        fabContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_ADD || requestCode == REQ_DETAIL) {
-            refreshList();
-        }
+    public void setToolbarTitle(String title, boolean showSearch, boolean showAvatar) {
+        topBarTitle.setText(title);
+        searchBtn.setVisibility(showSearch ? View.VISIBLE : View.GONE);
+        avatarContainer.setVisibility(showAvatar ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void logout() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

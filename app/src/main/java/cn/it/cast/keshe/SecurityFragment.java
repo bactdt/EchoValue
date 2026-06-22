@@ -14,11 +14,20 @@ import java.util.List;
 
 import cn.it.cast.keshe.data.CredentialRepository;
 import cn.it.cast.keshe.model.Credential;
+import cn.it.cast.keshe.util.SessionManager;
 import cn.it.cast.keshe.util.StrengthEvaluator;
 
 public class SecurityFragment extends Fragment {
 
     private CredentialRepository repository;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isVisible() && repository != null) {
+            populateOverview();
+        }
+    }
     private TextView scoreValue;
     private TextView scoreHint;
     private TextView savedCount;
@@ -37,6 +46,13 @@ public class SecurityFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // 守卫：必须已登录、已解锁
+        SessionManager session = new SessionManager(requireContext());
+        if (!session.isLoggedIn() || !session.isUnlocked() || !VaultApp.hasMasterPassword()) {
+            ((MainActivityCallback) requireActivity()).logout();
+            return;
+        }
+
         repository = new CredentialRepository(requireContext());
         repository.setMasterPassword(VaultApp.getMasterPassword());
 
@@ -44,7 +60,7 @@ public class SecurityFragment extends Fragment {
         populateOverview();
 
         MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarForTab(getString(R.string.nav_security));
+        callback.setToolbarTitle(getString(R.string.nav_security), false, false);
         callback.setFabVisible(false);
     }
 

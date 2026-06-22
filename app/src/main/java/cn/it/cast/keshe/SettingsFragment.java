@@ -29,7 +29,7 @@ public class SettingsFragment extends Fragment {
         wireEvents(view);
 
         MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarForTab(getString(R.string.nav_settings));
+        callback.setToolbarTitle(getString(R.string.nav_settings), false, false);
         callback.setFabVisible(false);
     }
 

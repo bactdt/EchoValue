@@ -52,20 +52,6 @@
             android:exported="false"
             android:theme="@style/Theme.Keshe" />
 
-        <activity
-            android:name=".PasswordGeneratorActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Keshe" />
-
-        <activity
-            android:name=".SecurityActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Keshe" />
-
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Keshe" />
-    </application>
+            </application>
 
 </manifest>
