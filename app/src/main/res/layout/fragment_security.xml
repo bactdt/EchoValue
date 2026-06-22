@@ -96,6 +96,8 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_password"
                     app:tint="@color/md_primary" />
 
@@ -133,6 +135,8 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_warning"
                     app:tint="@color/md_error" />
 
@@ -172,6 +176,8 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/bg_icon_circle_secondary"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
                 android:padding="8dp"
                 android:src="@drawable/ic_verified_user"
                 app:tint="@color/md_primary" />

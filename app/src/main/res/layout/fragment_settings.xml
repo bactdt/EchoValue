@@ -30,6 +30,8 @@
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_person"
                     app:tint="@color/md_on_primary_container" />
             </FrameLayout>

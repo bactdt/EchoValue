@@ -27,6 +27,8 @@
                 android:id="@+id/top_bar_icon"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
                 android:src="@drawable/ic_shield"
                 app:tint="@color/md_primary" />
 
@@ -46,6 +48,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/home_search_hint"
                 android:src="@drawable/ic_search"
                 android:visibility="visible"
                 app:tint="@color/md_on_surface_variant" />
@@ -93,6 +96,8 @@
                     android:id="@+id/nav_icon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_lock"
                     app:tint="@color/md_on_surface_variant" />
 
@@ -115,6 +120,8 @@
                     android:id="@+id/nav_icon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_password"
                     app:tint="@color/md_on_surface_variant" />
 
@@ -137,6 +144,8 @@
                     android:id="@+id/nav_icon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_verified_user"
                     app:tint="@color/md_on_surface_variant" />
 
@@ -159,6 +168,8 @@
                     android:id="@+id/nav_icon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_settings"
                     app:tint="@color/md_on_surface_variant" />
 
@@ -190,6 +201,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:background="@drawable/bg_fab"
+            android:contentDescription="@string/add_title"
             android:elevation="6dp"
             android:src="@drawable/ic_add"
             android:stateListAnimator="@null"

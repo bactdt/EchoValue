@@ -80,6 +80,7 @@
     <string name="home_notes">安全笔记</string>
     <string name="home_stat_saved">已保存密码</string>
     <string name="home_stat_2fa">双重认证已开启</string>
+    <string name="home_stat_favorites">收藏</string>
     <string name="home_empty_title">保管库为空</string>
     <string name="home_empty_subtitle">点击右下角加号添加您的第一条凭据</string>
     <string name="home_search_hint">搜索保管库…</string>
@@ -142,6 +143,8 @@
     <string name="generator_no_options">请选择选项</string>
     <string name="generator_copied">密码已复制</string>
     <string name="generator_use_password">使用此密码</string>
+    <string name="generator_password_placeholder">••••••••••••••••</string>
+    <string name="generator_length_default">16</string>
 
     <!-- Security -->
     <string name="security_overview_title">安全概览</string>
