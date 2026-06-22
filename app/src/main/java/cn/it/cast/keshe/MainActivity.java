@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         }
         if (!VaultApp.hasMasterPassword()) {
             session.setUnlocked(false);
-            session.setLoggedIn(false);
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;

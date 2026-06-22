@@ -46,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
 
         bindViews();
         wireEvents();
+        restoreSavedEmail();
 
         // 只有当前进程仍持有主密码且会话已解锁时，才直接进入 Vault。
         if (session.isLoggedIn() && session.isUnlocked() && VaultApp.hasMasterPassword()) {
@@ -53,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         } else if (session.isLoggedIn() && !VaultApp.hasMasterPassword()) {
             session.setUnlocked(false);
-            session.setLoggedIn(false);
+            passwordEdit.requestFocus();
         }
     }
 
@@ -67,6 +68,13 @@ public class LoginActivity extends AppCompatActivity {
         strengthContainer = findViewById(R.id.strength_container);
         strengthBar = findViewById(R.id.strength_bar);
         strengthText = findViewById(R.id.strength_text);
+    }
+
+    private void restoreSavedEmail() {
+        String email = session.getUserEmail();
+        if (email != null && !email.trim().isEmpty()) {
+            emailEdit.setText(email);
+        }
     }
 
     private void wireEvents() {

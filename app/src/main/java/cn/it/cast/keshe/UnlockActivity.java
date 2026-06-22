@@ -177,7 +177,7 @@ public class UnlockActivity extends AppCompatActivity {
 
     private void returnToLogin() {
         VaultApp.clearMasterPassword();
-        session.clearAll();
+        session.setUnlocked(false);
         Toast.makeText(this, R.string.unlock_no_pin, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
