@@ -30,15 +30,21 @@
 ## 2. 屏幕流程
 
 ```
-LoginActivity → (RegisterActivity) → UnlockActivity → MainActivity
-                                                       ├── PasswordGeneratorActivity
-                                                       └── PasswordDetailActivity
+LoginActivity → (RegisterActivity) → UnlockActivity → MainActivity (Fragment 容器)
+                                                       ├── VaultFragment (tab 1)
+                                                       ├── GeneratorFragment (tab 2)
+                                                       ├── SecurityFragment (tab 3)
+                                                       └── SettingsFragment (tab 4)
+                                                       ├── PasswordGeneratorActivity（外部启动，非 tab）
+                                                       ├── PasswordDetailActivity
                                                        └── AddCredentialActivity
 ```
 
 - `LoginActivity` 是 Launcher
 - `SessionManager` 控制登录态 + 解锁态
 - `VaultApp` 持有主密码（仅内存，char[]）
+- MainActivity 为单 Activity 宿主，4 个 tab 使用 FragmentTransaction.hide/show 切换
+- 底部导航栏只存在一份（activity_main.xml），永不重建
 
 ## 3. 数据层
 
@@ -68,35 +74,45 @@ cn.it.cast.keshe/
 │   ├── SessionManager.java
 │   └── StrengthEvaluator.java
 ├── VaultApp.java
+├── MainActivityCallback.java       ← Fragment 与 Activity 通信接口
+├── MainActivity.java               ← 单 Activity 宿主，管理 4 个 tab 切换
+├── VaultFragment.java              ← tab 1: 密码列表主页
+├── GeneratorFragment.java          ← tab 2: 密码生成器
+├── SecurityFragment.java           ← tab 3: 安全概览
+├── SettingsFragment.java           ← tab 4: 设置/注销
 ├── LoginActivity.java
 ├── RegisterActivity.java
 ├── UnlockActivity.java
-├── MainActivity.java
 ├── PasswordDetailActivity.java
-├── AddCredentialActivity.java
-└── PasswordGeneratorActivity.java
+└── AddCredentialActivity.java
 ```
 
 ## 5. 每个 Activity 的关键属性
 
-| Activity | 传入 Extra | 返回 | 布局文件 |
-|----------|-----------|------|---------|
-| LoginActivity | — | — | `activity_login.xml` |
-| RegisterActivity | `prefill_email` (可选) | — | `activity_register.xml` |
-| UnlockActivity | — | — | `activity_unlock.xml` |
-| MainActivity | — | — | `activity_main.xml` |
-| PasswordDetailActivity | `cred_id: long` | RESULT_OK 删除后 | `activity_password_detail.xml` |
-| AddCredentialActivity | `cred_id: long` (编辑模式) | RESULT_OK | `activity_add_credential.xml` |
-| PasswordGeneratorActivity | — | — | `activity_generator.xml` |
+| Activity | 传入 Extra | 返回 | 布局文件 | 备注 |
+|----------|-----------|------|---------|------|
+| LoginActivity | — | — | `activity_login.xml` | Launcher |
+| RegisterActivity | `prefill_email` (可选) | — | `activity_register.xml` | |
+| UnlockActivity | — | — | `activity_unlock.xml` | |
+| MainActivity | — | — | `activity_main.xml` | 宿主，包含 FragmentContainerView |
+| PasswordDetailActivity | `cred_id: long` | RESULT_OK 删除后 | `activity_password_detail.xml` | |
+| AddCredentialActivity | `cred_id: long` (编辑模式) | RESULT_OK | `activity_add_credential.xml` | |
+
+| Fragment | 对应 tab | 布局文件 | 
+|----------|----------|---------|
+| VaultFragment | 1 — Vault | `fragment_vault.xml` |
+| GeneratorFragment | 2 — 生成器 | `fragment_generator.xml` |
+| SecurityFragment | 3 — 安全 | `fragment_security.xml` |
+| SettingsFragment | 4 — 设置 | `fragment_settings.xml` |
 
 ## 6. 守卫（进入条件）
 
-所有除 Login/Register 外的 Activity 必须满足：
+所有除 Login/Register 外的 Activity 以及 MainActivity 中的 Fragment 必须满足：
 1. `SessionManager.isLoggedIn()` == true
 2. `SessionManager.isUnlocked()` == true
 3. `VaultApp.hasMasterPassword()` == true
 
-不满足时跳转回 LoginActivity 或 UnlockActivity。
+不满足时跳转回 LoginActivity 或 UnlockActivity。守卫在 MainActivity.onCreate() 和 Fragment.onViewCreated() 中各自执行。
 
 ## 7. 启动器优先级
 
@@ -128,8 +144,12 @@ implementation 'androidx.biometric:biometric:1.2.0-alpha05'
 ## 10. 导航栏
 
 底部 4 tab 固定顺序：**Vault | 生成器 | 安全 | 设置**
-- Vault: 当前 tab 高亮（chip active 样式）
-- 设置: 点击 = 注销（clear session）
+
+- 底栏只存在于 activity_main.xml 中，4 个 Fragment 不包含底栏
+- 切换方式：`FragmentTransaction.hide(current).show(next)`，保留 Fragment 实例状态，零延迟
+- 主 tab 用 `MainActivityCallback` 接口通知宿主切换 toolbar 标题、搜索按钮和头像显隐
+- FAB 只在 Vault tab 显示，其余 tab 隐藏
+- 设置 tab：点击注销按钮通过回调通知 MainActivity 清空 session 并跳转 Login
 
 ## 11. 样式约定
 
