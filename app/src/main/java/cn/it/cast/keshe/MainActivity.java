@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     private View topBar;
     private View titleGroup;
     private View fabContainer;
+    private View fab;
     private TextView topBarTitle;
     private EditText searchInput;
     private ImageView searchBtn;
@@ -121,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         topBar = findViewById(R.id.top_bar);
         titleGroup = findViewById(R.id.title_group);
         fabContainer = findViewById(R.id.fab_container);
+        fab = findViewById(R.id.fab);
         topBarTitle = findViewById(R.id.top_bar_title);
         searchInput = findViewById(R.id.search_input);
         searchBtn = findViewById(R.id.search_btn);
@@ -213,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             return false;
         });
 
-        fabContainer.setOnClickListener(v ->
+        fab.setOnClickListener(v ->
                 addCredentialLauncher.launch(new Intent(this, AddCredentialActivity.class)));
 
         avatarContainer.setOnClickListener(v -> switchToPage(PAGE_SETTINGS));
@@ -225,9 +227,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     }
 
     private void switchToPage(int page) {
-        if (currentPage == page && !searchVisible) return;
+        if (currentPage == page) {
+            if (searchVisible) {
+                closeSearch();
+            }
+            return;
+        }
         closeSearch(false);
-        viewPager.setCurrentItem(page, false);
+        viewPager.setCurrentItem(page, true);
     }
 
     private void setupViewPager() {
@@ -237,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         settingsFragment = new SettingsFragment();
 
         viewPager.setAdapter(new PagerAdapter(this));
-        viewPager.setOffscreenPageLimit(3);
+        viewPager.setOffscreenPageLimit(1);
         viewPager.setUserInputEnabled(true);
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -258,12 +265,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
                 updateFabForPage(position);
                 if (position != PAGE_VAULT) {
                     closeSearch();
-                }
-                if (position == PAGE_VAULT && vaultFragment != null) {
-                    vaultFragment.refreshList();
-                }
-                if (position == PAGE_SECURITY && securityFragment != null) {
-                    securityFragment.refreshOverview();
                 }
             }
 
@@ -321,7 +322,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             navLabels[i].getPaint().setFakeBoldText(active);
             navLabels[i].invalidate();
         }
-        positionIndicator(selected, true);
     }
 
     private void updateToolbarForPage(int page) {
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             return;
         }
         if (currentPage != PAGE_VAULT) {
-            viewPager.setCurrentItem(PAGE_VAULT, false);
+            viewPager.setCurrentItem(PAGE_VAULT, true);
             return;
         }
         super.onBackPressed();

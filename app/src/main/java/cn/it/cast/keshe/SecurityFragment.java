@@ -21,14 +21,6 @@ public class SecurityFragment extends Fragment {
 
     private CredentialRepository repository;
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (isVisible() && repository != null) {
-            refreshOverview();
-        }
-    }
-
     private TextView scoreValue;
     private TextView scoreHint;
     private TextView savedCount;
