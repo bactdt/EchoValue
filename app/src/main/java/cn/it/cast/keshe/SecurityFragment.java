@@ -25,9 +25,10 @@ public class SecurityFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (isVisible() && repository != null) {
-            populateOverview();
+            refreshOverview();
         }
     }
+
     private TextView scoreValue;
     private TextView scoreHint;
     private TextView savedCount;
@@ -57,11 +58,7 @@ public class SecurityFragment extends Fragment {
         repository.setMasterPassword(VaultApp.getMasterPassword());
 
         bindViews(view);
-        populateOverview();
-
-        MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarTitle(getString(R.string.nav_security), false, false);
-        callback.setFabVisible(false);
+        refreshOverview();
     }
 
     private void bindViews(View view) {
@@ -74,7 +71,8 @@ public class SecurityFragment extends Fragment {
         scoreBar = view.findViewById(R.id.security_score_bar);
     }
 
-    private void populateOverview() {
+    public void refreshOverview() {
+        if (repository == null || getView() == null) return;
         List<Credential> credentials = repository.list();
         int saved = credentials.size();
         int weak = 0;

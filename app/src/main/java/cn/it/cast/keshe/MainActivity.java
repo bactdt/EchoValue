@@ -2,42 +2,57 @@ package cn.it.cast.keshe;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.ImageButton;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import java.util.Locale;
 
-import cn.it.cast.keshe.data.CredentialRepository;
 import cn.it.cast.keshe.util.SessionManager;
 
 public class MainActivity extends AppCompatActivity implements MainActivityCallback {
 
-    private Fragment[] fragments;
-    private int currentTab = 0;
-    private static final int TAB_VAULT = 0;
-    private static final int TAB_GENERATOR = 1;
-    private static final int TAB_SECURITY = 2;
-    private static final int TAB_SETTINGS = 3;
+    private static final int PAGE_VAULT = 0;
+    private static final int PAGE_GENERATOR = 1;
+    private static final int PAGE_SECURITY = 2;
+    private static final int PAGE_SETTINGS = 3;
 
+    private ViewPager2 viewPager;
+    private VaultFragment vaultFragment;
+    private GeneratorFragment generatorFragment;
+    private SecurityFragment securityFragment;
+    private SettingsFragment settingsFragment;
+
+    private View titleGroup;
     private View fabContainer;
     private TextView topBarTitle;
-    private View searchBtn;
+    private EditText searchInput;
+    private ImageView searchBtn;
     private View avatarContainer;
     private TextView avatarText;
-    private View bottomNav;
     private View[] navItems = new View[4];
     private ImageView[] navIcons = new ImageView[4];
     private TextView[] navLabels = new TextView[4];
+    private View navIndicator;
+    private int currentPage = PAGE_VAULT;
+    private int indicatorWidth;
+    private int tabWidth;
+    private boolean searchVisible;
+    private boolean userDragging;
 
     private ActivityResultLauncher<Intent> addCredentialLauncher;
 
@@ -71,41 +86,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         // 注册 ActivityResultLauncher（替代 startActivityForResult）
         addCredentialLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), result -> {
-                    if (result.getResultCode() == RESULT_OK && currentTab == TAB_VAULT) {
-                        VaultFragment vf = (VaultFragment) fragments[TAB_VAULT];
-                        if (vf != null) vf.onResume();
+                    if (result.getResultCode() == RESULT_OK && vaultFragment != null) {
+                        vaultFragment.refreshList();
                     }
                 });
-
-        // 初始化 Fragment
-        fragments = new Fragment[4];
-        fragments[TAB_VAULT] = new VaultFragment();
-        fragments[TAB_GENERATOR] = new GeneratorFragment();
-        fragments[TAB_SECURITY] = new SecurityFragment();
-        fragments[TAB_SETTINGS] = new SettingsFragment();
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.fragment_container, fragments[TAB_VAULT], "tab_vault");
-        for (int i = 1; i < fragments.length; i++) {
-            ft.add(R.id.fragment_container, fragments[i], "tab_" + i);
-            ft.hide(fragments[i]);
-        }
-        ft.commit();
-
-        // 设置导航点击
-        for (int i = 0; i < navItems.length; i++) {
-            final int tab = i;
-            navItems[i].setOnClickListener(v -> switchTab(tab));
-        }
-
-        // FAB 点击
-        fabContainer.setOnClickListener(v -> {
-            addCredentialLauncher.launch(new Intent(this, AddCredentialActivity.class));
-        });
-
-        // 搜索按钮
-        searchBtn.setOnClickListener(v ->
-                Toast.makeText(this, R.string.home_search_hint, Toast.LENGTH_SHORT).show());
 
         // 头像
         String name = session.getUserName();
@@ -113,18 +97,24 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             avatarText.setText(name.substring(0, Math.min(2, name.length())).toUpperCase(Locale.ROOT));
         }
 
-        // 更新初始 tab 样式
-        updateNavStyles(TAB_VAULT);
-        currentTab = TAB_VAULT;
+        wireEvents();
+        setupViewPager();
+        initIndicator();
+        updateToolbarForPage(PAGE_VAULT);
+        updateFabForPage(PAGE_VAULT);
+        updateNavStyles(PAGE_VAULT);
     }
 
     private void bindViews() {
+        titleGroup = findViewById(R.id.title_group);
         fabContainer = findViewById(R.id.fab_container);
         topBarTitle = findViewById(R.id.top_bar_title);
+        searchInput = findViewById(R.id.search_input);
         searchBtn = findViewById(R.id.search_btn);
         avatarContainer = findViewById(R.id.avatar_container);
         avatarText = findViewById(R.id.avatar_text);
-        bottomNav = findViewById(R.id.bottom_nav);
+        viewPager = findViewById(R.id.view_pager);
+        navIndicator = findViewById(R.id.nav_indicator);
 
         navItems[0] = findViewById(R.id.nav_vault);
         navItems[1] = findViewById(R.id.nav_generator);
@@ -137,23 +127,126 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         }
     }
 
-    private void switchTab(int index) {
-        if (index == currentTab) return;
+    private void wireEvents() {
+        searchBtn.setOnClickListener(v -> {
+            if (searchVisible) {
+                closeSearch();
+            } else if (currentPage == PAGE_VAULT) {
+                openSearch();
+            }
+        });
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.hide(fragments[currentTab]);
-        ft.show(fragments[index]);
-        ft.commit();
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-        updateNavStyles(index);
-        currentTab = index;
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
-        // 通知 Fragment 选中
-        if (fragments[index] instanceof VaultFragment) {
-            ((VaultFragment) fragments[index]).onResume();
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (vaultFragment != null) {
+                    vaultFragment.filter(s.toString());
+                }
+            }
+        });
+
+        searchInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                if (vaultFragment != null) {
+                    vaultFragment.filter(searchInput.getText().toString());
+                }
+                return true;
+            }
+            return false;
+        });
+
+        fabContainer.setOnClickListener(v ->
+                addCredentialLauncher.launch(new Intent(this, AddCredentialActivity.class)));
+
+        for (int i = 0; i < navItems.length; i++) {
+            final int page = i;
+            navItems[i].setOnClickListener(v -> {
+                if (currentPage != page) {
+                    closeSearch();
+                    viewPager.setCurrentItem(page, true);
+                }
+            });
         }
-        if (fragments[index] instanceof SecurityFragment) {
-            ((SecurityFragment) fragments[index]).onResume();
+    }
+
+    private void setupViewPager() {
+        vaultFragment = new VaultFragment();
+        generatorFragment = new GeneratorFragment();
+        securityFragment = new SecurityFragment();
+        settingsFragment = new SettingsFragment();
+
+        viewPager.setAdapter(new PagerAdapter(this));
+        viewPager.setOffscreenPageLimit(3);
+        viewPager.setUserInputEnabled(true);
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                if (tabWidth == 0 || indicatorWidth == 0) return;
+                if (userDragging) {
+                    float targetX = (position + positionOffset) * tabWidth + (tabWidth - indicatorWidth) / 2f;
+                    navIndicator.setTranslationX(targetX);
+                }
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                currentPage = position;
+                updateNavStyles(position);
+                updateToolbarForPage(position);
+                updateFabForPage(position);
+                if (position != PAGE_VAULT) {
+                    closeSearch();
+                }
+                if (position == PAGE_VAULT && vaultFragment != null) {
+                    vaultFragment.refreshList();
+                }
+                if (position == PAGE_SECURITY && securityFragment != null) {
+                    securityFragment.refreshOverview();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                userDragging = state == ViewPager2.SCROLL_STATE_DRAGGING;
+                if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                    positionIndicator(currentPage, true);
+                }
+            }
+        });
+    }
+
+    private void initIndicator() {
+        navIndicator.post(() -> {
+            int totalWidth = navIndicator.getRootView().getWidth();
+            tabWidth = totalWidth / 4;
+            indicatorWidth = tabWidth - dp(20);
+            ViewGroup.LayoutParams lp = navIndicator.getLayoutParams();
+            lp.width = indicatorWidth;
+            navIndicator.setLayoutParams(lp);
+            positionIndicator(PAGE_VAULT, false);
+        });
+    }
+
+    private void positionIndicator(int page, boolean animate) {
+        if (tabWidth == 0 || indicatorWidth == 0) return;
+        float targetX = page * tabWidth + (tabWidth - indicatorWidth) / 2f;
+        if (animate) {
+            navIndicator.animate()
+                    .translationX(targetX)
+                    .setDuration(260)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator(2f))
+                    .start();
+        } else {
+            navIndicator.setTranslationX(targetX);
         }
     }
 
@@ -161,9 +254,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         for (int i = 0; i < 4; i++) {
             boolean active = i == selected;
             navItems[i].setBackgroundResource(0);
-            if (active) {
-                navItems[i].setBackgroundResource(R.drawable.bg_chip_active);
-            }
             navIcons[i].setColorFilter(ContextCompat.getColor(this,
                     active ? R.color.md_on_secondary_container : R.color.md_on_surface_variant));
             navLabels[i].setTextColor(ContextCompat.getColor(this,
@@ -171,19 +261,86 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             navLabels[i].getPaint().setFakeBoldText(active);
             navLabels[i].invalidate();
         }
+        positionIndicator(selected, true);
+    }
+
+    private void updateToolbarForPage(int page) {
+        switch (page) {
+            case PAGE_GENERATOR:
+                setToolbarTitle(getString(R.string.nav_generator), false, false);
+                break;
+            case PAGE_SECURITY:
+                setToolbarTitle(getString(R.string.nav_security), false, false);
+                break;
+            case PAGE_SETTINGS:
+                setToolbarTitle(getString(R.string.nav_settings), false, false);
+                break;
+            default:
+                setToolbarTitle(getString(R.string.nav_vault), true, true);
+                break;
+        }
+    }
+
+    private void updateFabForPage(int page) {
+        fabContainer.setVisibility(page == PAGE_VAULT && !searchVisible ? View.VISIBLE : View.GONE);
+    }
+
+    private void openSearch() {
+        searchVisible = true;
+        titleGroup.setVisibility(View.GONE);
+        searchInput.setVisibility(View.VISIBLE);
+        avatarContainer.setVisibility(View.GONE);
+        searchInput.setText("");
+        searchInput.requestFocus();
+        searchBtn.setImageResource(R.drawable.ic_close);
+        fabContainer.setVisibility(View.GONE);
+    }
+
+    private void closeSearch() {
+        if (!searchVisible) return;
+        searchVisible = false;
+        searchInput.setVisibility(View.GONE);
+        searchInput.setText("");
+        titleGroup.setVisibility(View.VISIBLE);
+        searchBtn.setImageResource(R.drawable.ic_search);
+        updateToolbarForPage(currentPage);
+        updateFabForPage(currentPage);
+        if (vaultFragment != null) {
+            vaultFragment.filter("");
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (searchVisible) {
+            closeSearch();
+            return;
+        }
+        if (currentPage != PAGE_VAULT) {
+            viewPager.setCurrentItem(PAGE_VAULT, true);
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density);
     }
 
     // ─── MainActivityCallback ────────────────────────────────────────────
 
     @Override
     public void setFabVisible(boolean visible) {
-        fabContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (currentPage == PAGE_VAULT && !searchVisible) {
+            fabContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
     public void setToolbarTitle(String title, boolean showSearch, boolean showAvatar) {
+        titleGroup.setVisibility(View.VISIBLE);
         topBarTitle.setText(title);
-        searchBtn.setVisibility(showSearch ? View.VISIBLE : View.GONE);
+        searchBtn.setVisibility(showSearch && !searchVisible ? View.VISIBLE : View.GONE);
         avatarContainer.setVisibility(showAvatar ? View.VISIBLE : View.GONE);
     }
 
@@ -193,5 +350,32 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private class PagerAdapter extends FragmentStateAdapter {
+
+        PagerAdapter(@NonNull AppCompatActivity activity) {
+            super(activity);
+        }
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            switch (position) {
+                case PAGE_GENERATOR:
+                    return generatorFragment;
+                case PAGE_SECURITY:
+                    return securityFragment;
+                case PAGE_SETTINGS:
+                    return settingsFragment;
+                default:
+                    return vaultFragment;
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return 4;
+        }
     }
 }

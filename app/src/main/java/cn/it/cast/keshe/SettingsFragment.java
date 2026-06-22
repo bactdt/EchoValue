@@ -27,10 +27,6 @@ public class SettingsFragment extends Fragment {
 
         bindUser(view);
         wireEvents(view);
-
-        MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarTitle(getString(R.string.nav_settings), false, false);
-        callback.setFabVisible(false);
     }
 
     private void bindUser(View view) {

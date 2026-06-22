@@ -55,10 +55,6 @@ public class VaultFragment extends Fragment {
         wireEvents(view);
         refreshList();
 
-        MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarTitle(getString(R.string.nav_vault), true, true);
-        callback.setFabVisible(true);
-
         if (repository.count() == 0) {
             seedSampleCredentials();
         }
@@ -102,6 +98,7 @@ public class VaultFragment extends Fragment {
     private static final int FILTER_PASSWORDS = 2;
     private static final int FILTER_NOTES = 3;
     private int currentFilter = FILTER_ALL;
+    private String searchQuery = "";
 
     private void launchDetail(Credential cred) {
         Intent it = new Intent(requireContext(), PasswordDetailActivity.class);
@@ -133,7 +130,7 @@ public class VaultFragment extends Fragment {
         }
     }
 
-    private void refreshList() {
+    public void refreshList() {
         if (repository == null || getView() == null) return;
         List<Credential> all = repository.list();
 
@@ -165,16 +162,24 @@ public class VaultFragment extends Fragment {
         for (Credential c : all) {
             switch (currentFilter) {
                 case FILTER_FAVORITES:
-                    if (c.isFavorite()) filtered.add(c);
+                    if (c.isFavorite() && matchesSearch(c)) filtered.add(c);
                     break;
                 case FILTER_PASSWORDS:
-                    if (c.getUsername() != null && !c.getUsername().trim().isEmpty()) filtered.add(c);
+                    if (c.getUsername() != null
+                            && !c.getUsername().trim().isEmpty()
+                            && matchesSearch(c)) {
+                        filtered.add(c);
+                    }
                     break;
                 case FILTER_NOTES:
-                    if (c.getNotes() != null && !c.getNotes().trim().isEmpty()) filtered.add(c);
+                    if (c.getNotes() != null
+                            && !c.getNotes().trim().isEmpty()
+                            && matchesSearch(c)) {
+                        filtered.add(c);
+                    }
                     break;
                 default:
-                    filtered.add(c);
+                    if (matchesSearch(c)) filtered.add(c);
             }
         }
 
@@ -183,6 +188,23 @@ public class VaultFragment extends Fragment {
         rv.setAdapter(adapter);
 
         emptyState.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    public void filter(String query) {
+        searchQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        refreshList();
+    }
+
+    private boolean matchesSearch(Credential credential) {
+        if (searchQuery.isEmpty()) return true;
+        return contains(credential.getName(), searchQuery)
+                || contains(credential.getUsername(), searchQuery)
+                || contains(credential.getWebsite(), searchQuery)
+                || contains(credential.getNotes(), searchQuery);
+    }
+
+    private boolean contains(String value, String query) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(query);
     }
 
     private void seedSampleCredentials() {

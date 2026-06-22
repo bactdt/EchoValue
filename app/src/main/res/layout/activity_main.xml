@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/md_background">
 
     <LinearLayout
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="56dp"
+        android:background="@color/md_surface"
+        android:elevation="0dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
 
-        <!-- Top app bar -->
         <LinearLayout
-            android:id="@+id/top_bar"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/md_surface"
-            android:elevation="0dp"
+            android:id="@+id/title_group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
+            android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/top_bar_icon"
@@ -34,57 +37,85 @@
 
             <TextView
                 android:id="@+id/top_bar_title"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_weight="1"
                 android:text="@string/login_title"
                 android:textColor="@color/md_primary"
                 android:textSize="22sp"
                 android:textStyle="bold" />
-
-            <ImageButton
-                android:id="@+id/search_btn"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/home_search_hint"
-                android:src="@drawable/ic_search"
-                android:visibility="visible"
-                app:tint="@color/md_on_surface_variant" />
-
-            <FrameLayout
-                android:id="@+id/avatar_container"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_avatar_circle">
-
-                <TextView
-                    android:id="@+id/avatar_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="JS"
-                    android:textColor="@color/md_on_primary_container"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
         </LinearLayout>
 
-        <!-- Fragment content -->
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+        <EditText
+            android:id="@+id/search_input"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_input_rounded"
+            android:hint="@string/home_search_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:paddingHorizontal="12dp"
+            android:textColor="@color/md_on_surface"
+            android:textColorHint="@color/md_on_surface_variant"
+            android:textSize="14sp"
+            android:visibility="gone" />
 
-        <!-- Bottom nav -->
+        <ImageButton
+            android:id="@+id/search_btn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/home_search_hint"
+            android:src="@drawable/ic_search"
+            android:visibility="visible"
+            app:tint="@color/md_on_surface_variant" />
+
+        <FrameLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_avatar_circle">
+
+            <TextView
+                android:id="@+id/avatar_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="JS"
+                android:textColor="@color/md_on_primary_container"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp"
+        android:layout_marginBottom="80dp"
+        android:overScrollMode="never" />
+
+    <FrameLayout
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_gravity="bottom"
+        android:background="@color/md_surface_container_low">
+
+        <View
+            android:id="@+id/nav_indicator"
+            android:layout_width="80dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginVertical="10dp"
+            android:background="@drawable/bg_nav_active" />
+
         <LinearLayout
-            android:id="@+id/bottom_nav"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:background="@color/md_surface_container_low"
+            android:layout_height="match_parent"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -183,9 +214,8 @@
                     android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 
-    <!-- FAB -->
     <FrameLayout
         android:id="@+id/fab_container"
         android:layout_width="wrap_content"
@@ -207,4 +237,4 @@
             android:stateListAnimator="@null"
             app:tint="@color/md_on_primary" />
     </FrameLayout>
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

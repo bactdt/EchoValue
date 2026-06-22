@@ -47,10 +47,6 @@ public class GeneratorFragment extends Fragment {
         bindViews(view);
         wireEvents();
         generate();
-
-        MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarTitle(getString(R.string.nav_generator), false, false);
-        callback.setFabVisible(false);
     }
 
     private void bindViews(View view) {
