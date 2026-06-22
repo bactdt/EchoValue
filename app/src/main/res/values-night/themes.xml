@@ -26,8 +26,9 @@
         <item name="colorOutlineVariant">@color/md_outline_variant</item>
         <item name="android:statusBarColor">@color/md_background</item>
         <item name="android:navigationBarColor">@color/md_surface_container_low</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
     <style name="Theme.Keshe" parent="Base.Theme.Keshe" />
 </resources>

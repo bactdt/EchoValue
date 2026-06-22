@@ -76,7 +76,11 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginStart="8dp"
-            android:background="@drawable/bg_avatar_circle">
+            android:background="@drawable/bg_avatar_circle"
+            android:clickable="true"
+            android:contentDescription="@string/nav_settings"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
 
             <TextView
                 android:id="@+id/avatar_text"

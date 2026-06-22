@@ -1,11 +1,13 @@
 package cn.it.cast.keshe;
 
 import android.content.Intent;
+import android.graphics.Insets;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,6 +32,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     private static final int PAGE_GENERATOR = 1;
     private static final int PAGE_SECURITY = 2;
     private static final int PAGE_SETTINGS = 3;
+    private static final int TOP_BAR_HEIGHT_DP = 56;
+    private static final int BOTTOM_NAV_HEIGHT_DP = 80;
+    private static final int FAB_BOTTOM_MARGIN_DP = 104;
 
     private ViewPager2 viewPager;
     private VaultFragment vaultFragment;
@@ -37,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     private SecurityFragment securityFragment;
     private SettingsFragment settingsFragment;
 
+    private View root;
+    private View topBar;
     private View titleGroup;
     private View fabContainer;
     private TextView topBarTitle;
@@ -51,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     private int currentPage = PAGE_VAULT;
     private int indicatorWidth;
     private int tabWidth;
+    private int topInset;
+    private int bottomInset;
     private boolean searchVisible;
     private boolean userDragging;
 
@@ -59,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setDecorFitsSystemWindows(false);
 
         // 守卫：必须已登录、已解锁、且持有主密码
         SessionManager session = new SessionManager(this);
@@ -82,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
 
         setContentView(R.layout.activity_main);
         bindViews();
+        applyWindowInsets();
 
         // 注册 ActivityResultLauncher（替代 startActivityForResult）
         addCredentialLauncher = registerForActivityResult(
@@ -106,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     }
 
     private void bindViews() {
+        root = findViewById(R.id.root);
+        topBar = findViewById(R.id.top_bar);
         titleGroup = findViewById(R.id.title_group);
         fabContainer = findViewById(R.id.fab_container);
         topBarTitle = findViewById(R.id.top_bar_title);
@@ -125,6 +138,43 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             navIcons[i] = navItems[i].findViewById(R.id.nav_icon);
             navLabels[i] = navItems[i].findViewById(R.id.nav_label);
         }
+    }
+
+    private void applyWindowInsets() {
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            Insets statusInsets = insets.getInsets(WindowInsets.Type.statusBars());
+            Insets navInsets = insets.getInsets(WindowInsets.Type.navigationBars());
+            topInset = statusInsets.top;
+            bottomInset = navInsets.bottom;
+            applySystemBarInsets();
+            return insets;
+        });
+        root.requestApplyInsets();
+    }
+
+    private void applySystemBarInsets() {
+        int topBarHeight = dp(TOP_BAR_HEIGHT_DP) + topInset;
+        ViewGroup.LayoutParams topBarLp = topBar.getLayoutParams();
+        topBarLp.height = topBarHeight;
+        topBar.setLayoutParams(topBarLp);
+        topBar.setPadding(topBar.getPaddingLeft(), topInset, topBar.getPaddingRight(), 0);
+
+        ViewGroup.MarginLayoutParams pagerLp = (ViewGroup.MarginLayoutParams) viewPager.getLayoutParams();
+        pagerLp.topMargin = topBarHeight;
+        pagerLp.bottomMargin = dp(BOTTOM_NAV_HEIGHT_DP) + bottomInset;
+        viewPager.setLayoutParams(pagerLp);
+
+        View bottomNav = findViewById(R.id.bottom_nav);
+        ViewGroup.LayoutParams bottomNavLp = bottomNav.getLayoutParams();
+        bottomNavLp.height = dp(BOTTOM_NAV_HEIGHT_DP) + bottomInset;
+        bottomNav.setLayoutParams(bottomNavLp);
+        bottomNav.setPadding(bottomNav.getPaddingLeft(), 0, bottomNav.getPaddingRight(), bottomInset);
+
+        ViewGroup.MarginLayoutParams fabLp = (ViewGroup.MarginLayoutParams) fabContainer.getLayoutParams();
+        fabLp.bottomMargin = dp(FAB_BOTTOM_MARGIN_DP) + bottomInset;
+        fabContainer.setLayoutParams(fabLp);
+
+        updateIndicatorSize(false);
     }
 
     private void wireEvents() {
@@ -166,15 +216,18 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         fabContainer.setOnClickListener(v ->
                 addCredentialLauncher.launch(new Intent(this, AddCredentialActivity.class)));
 
+        avatarContainer.setOnClickListener(v -> switchToPage(PAGE_SETTINGS));
+
         for (int i = 0; i < navItems.length; i++) {
             final int page = i;
-            navItems[i].setOnClickListener(v -> {
-                if (currentPage != page) {
-                    closeSearch();
-                    viewPager.setCurrentItem(page, true);
-                }
-            });
+            navItems[i].setOnClickListener(v -> switchToPage(page));
         }
+    }
+
+    private void switchToPage(int page) {
+        if (currentPage == page && !searchVisible) return;
+        closeSearch(false);
+        viewPager.setCurrentItem(page, false);
     }
 
     private void setupViewPager() {
@@ -225,14 +278,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     }
 
     private void initIndicator() {
+        navIndicator.post(() -> updateIndicatorSize(false));
+    }
+
+    private void updateIndicatorSize(boolean animate) {
         navIndicator.post(() -> {
             int totalWidth = navIndicator.getRootView().getWidth();
+            if (totalWidth == 0) return;
             tabWidth = totalWidth / 4;
-            indicatorWidth = tabWidth - dp(20);
+            indicatorWidth = Math.max(0, tabWidth - dp(20));
             ViewGroup.LayoutParams lp = navIndicator.getLayoutParams();
-            lp.width = indicatorWidth;
-            navIndicator.setLayoutParams(lp);
-            positionIndicator(PAGE_VAULT, false);
+            if (lp.width != indicatorWidth) {
+                lp.width = indicatorWidth;
+                navIndicator.setLayoutParams(lp);
+            }
+            positionIndicator(currentPage, animate);
         });
     }
 
@@ -297,14 +357,20 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     }
 
     private void closeSearch() {
+        closeSearch(true);
+    }
+
+    private void closeSearch(boolean restoreCurrentUi) {
         if (!searchVisible) return;
         searchVisible = false;
         searchInput.setVisibility(View.GONE);
         searchInput.setText("");
         titleGroup.setVisibility(View.VISIBLE);
         searchBtn.setImageResource(R.drawable.ic_search);
-        updateToolbarForPage(currentPage);
-        updateFabForPage(currentPage);
+        if (restoreCurrentUi) {
+            updateToolbarForPage(currentPage);
+            updateFabForPage(currentPage);
+        }
         if (vaultFragment != null) {
             vaultFragment.filter("");
         }
@@ -317,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             return;
         }
         if (currentPage != PAGE_VAULT) {
-            viewPager.setCurrentItem(PAGE_VAULT, true);
+            viewPager.setCurrentItem(PAGE_VAULT, false);
             return;
         }
         super.onBackPressed();
