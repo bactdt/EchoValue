@@ -161,5 +161,18 @@
     <string name="settings_logout">退出登录</string>
     <string name="settings_unknown_user">未命名用户</string>
     <string name="settings_unknown_email">未设置邮箱</string>
+    <string name="settings_security_title">快速解锁</string>
+    <string name="settings_pin_hint">设置 6 位数字 PIN 后，可选择在应用回到前台时使用 PIN 锁。</string>
+    <string name="settings_pin_label">PIN</string>
+    <string name="settings_pin_input_hint">6 位数字</string>
+    <string name="settings_pin_save">保存 PIN</string>
+    <string name="settings_pin_lock_enabled_label">后台恢复使用 PIN 锁</string>
+    <string name="settings_pin_not_configured">未设置 PIN，后台恢复不会进入 PIN 锁。</string>
+    <string name="settings_pin_configured_disabled">PIN 已设置，打开开关后后台恢复会要求 PIN。</string>
+    <string name="settings_pin_enabled">后台 PIN 锁已开启。</string>
+    <string name="settings_pin_invalid">请输入 6 位数字 PIN</string>
+    <string name="settings_pin_saved">PIN 已保存</string>
+    <string name="settings_pin_enable_requires_pin">请先保存 PIN</string>
+    <string name="settings_pin_update_failed">PIN 保存失败</string>
 
 </resources>

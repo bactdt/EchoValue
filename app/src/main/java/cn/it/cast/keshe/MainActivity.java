@@ -85,9 +85,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
             return;
         }
         if (!session.isUnlocked()) {
-            startActivity(new Intent(this, UnlockActivity.class));
-            finish();
-            return;
+            if (VaultApp.isPinLockAvailable(this)) {
+                startActivity(new Intent(this, UnlockActivity.class));
+                finish();
+                return;
+            }
+            session.setUnlocked(true);
         }
 
         setContentView(R.layout.activity_main);

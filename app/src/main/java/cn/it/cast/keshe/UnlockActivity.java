@@ -57,8 +57,13 @@ public class UnlockActivity extends AppCompatActivity {
             return;
         }
 
-        if (!hasConfiguredPin()) {
-            returnToLogin();
+        if (!VaultApp.isPinLockAvailable(this)) {
+            if (VaultApp.hasMasterPassword()) {
+                session.setUnlocked(true);
+                goToVault();
+            } else {
+                returnToLogin();
+            }
             return;
         }
 
@@ -168,11 +173,6 @@ public class UnlockActivity extends AppCompatActivity {
     private void clearPinEntry() {
         pin.setLength(0);
         updateDots();
-    }
-
-    private boolean hasConfiguredPin() {
-        UserAccount user = dbHelper.findUserByEmail(session.getUserEmail());
-        return user != null && user.getPinHash() != null && !user.getPinHash().trim().isEmpty();
     }
 
     private void returnToLogin() {

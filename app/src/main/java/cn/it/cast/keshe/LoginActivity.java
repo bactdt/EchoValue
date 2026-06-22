@@ -48,13 +48,21 @@ public class LoginActivity extends AppCompatActivity {
         wireEvents();
         restoreSavedEmail();
 
-        // 只有当前进程仍持有主密码且会话已解锁时，才直接进入 Vault。
-        if (session.isLoggedIn() && session.isUnlocked() && VaultApp.hasMasterPassword()) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        } else if (session.isLoggedIn() && !VaultApp.hasMasterPassword()) {
-            session.setUnlocked(false);
-            passwordEdit.requestFocus();
+        if (session.isLoggedIn()) {
+            if (session.isUnlocked() && VaultApp.hasMasterPassword()) {
+                startActivity(new Intent(this, MainActivity.class));
+                finish();
+            } else if (VaultApp.hasMasterPassword() && VaultApp.isPinLockAvailable(this)) {
+                startActivity(new Intent(this, UnlockActivity.class));
+                finish();
+            } else if (VaultApp.hasMasterPassword()) {
+                session.setUnlocked(true);
+                startActivity(new Intent(this, MainActivity.class));
+                finish();
+            } else {
+                session.setUnlocked(false);
+                passwordEdit.requestFocus();
+            }
         }
     }
 
