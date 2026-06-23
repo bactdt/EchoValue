@@ -175,4 +175,6 @@
     <string name="settings_pin_enable_requires_pin">请先保存 PIN</string>
     <string name="settings_pin_update_failed">PIN 保存失败</string>
 
+    <string name="security_placeholder">–</string>
+
 </resources>

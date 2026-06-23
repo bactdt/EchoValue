@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import cn.it.cast.keshe.data.VaultDbHelper;
 import cn.it.cast.keshe.model.UserAccount;
+import cn.it.cast.keshe.util.CryptoUtil;
 import cn.it.cast.keshe.util.SessionManager;
 
 /**
@@ -39,6 +40,7 @@ public class VaultApp extends Application {
             for (int i = 0; i < sMasterPassword.length; i++) sMasterPassword[i] = '\0';
         }
         sMasterPassword = null;
+        CryptoUtil.clearKeyCache();
     }
 
     @Override
