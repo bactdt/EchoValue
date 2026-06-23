@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import cn.it.cast.keshe.data.VaultDbHelper;
 import cn.it.cast.keshe.model.UserAccount;
@@ -16,9 +17,12 @@ import cn.it.cast.keshe.util.SessionManager;
  */
 public class VaultApp extends Application {
 
+    private static final long BACKGROUND_LOCK_TIMEOUT_MS = 5 * 60 * 1000;
+
     private static char[] sMasterPassword;
     private int startedActivities;
     private boolean changingConfiguration;
+    private long backgroundedAt;
 
     public static void setMasterPassword(char[] password) {
         if (sMasterPassword != null) {
@@ -33,6 +37,11 @@ public class VaultApp extends Application {
 
     public static boolean hasMasterPassword() {
         return sMasterPassword != null && sMasterPassword.length > 0;
+    }
+
+    /** Autofill 服务查询：主密码是否在内存可用。 */
+    public static boolean isMasterPasswordAvailable() {
+        return hasMasterPassword();
     }
 
     public static void clearMasterPassword() {
@@ -57,6 +66,8 @@ public class VaultApp extends Application {
 
             @Override
             public void onActivityResumed(Activity activity) {
+                expireMasterPasswordIfTimedOut();
+                backgroundedAt = 0;
                 redirectIfLocked(activity);
             }
 
@@ -82,7 +93,20 @@ public class VaultApp extends Application {
             return;
         }
         if (isPinLockAvailable(this)) {
-            session.setUnlocked(false);
+            // 不立即清主密码，记录后台时间戳；5 分钟超时后才清。
+            backgroundedAt = SystemClock.elapsedRealtime();
+        }
+    }
+
+    private void expireMasterPasswordIfTimedOut() {
+        if (backgroundedAt == 0) return;
+        long elapsed = SystemClock.elapsedRealtime() - backgroundedAt;
+        if (elapsed > BACKGROUND_LOCK_TIMEOUT_MS) {
+            SessionManager session = new SessionManager(this);
+            if (isPinLockAvailable(this)) {
+                clearMasterPassword();
+                session.setUnlocked(false);
+            }
         }
     }
 
