@@ -1,5 +1,7 @@
 package cn.it.cast.keshe;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.pm.PackageInfoCompat;
 import androidx.fragment.app.Fragment;
 
 import cn.it.cast.keshe.data.VaultDbHelper;
@@ -40,6 +43,7 @@ public class SettingsFragment extends Fragment {
 
         bindUser(view);
         bindPinLock(view);
+        bindVersion(view);
         wireEvents(view);
     }
 
@@ -50,6 +54,19 @@ public class SettingsFragment extends Fragment {
                 TextUtils.isEmpty(name) ? getString(R.string.settings_unknown_user) : name);
         ((TextView) view.findViewById(R.id.settings_user_email)).setText(
                 TextUtils.isEmpty(email) ? getString(R.string.settings_unknown_email) : email);
+    }
+
+    private void bindVersion(View view) {
+        TextView versionView = view.findViewById(R.id.settings_version);
+        String version = "";
+        try {
+            PackageInfo info = requireContext().getPackageManager()
+                    .getPackageInfo(requireContext().getPackageName(), 0);
+            version = "v" + info.versionName + " (" + PackageInfoCompat.getLongVersionCode(info) + ")";
+        } catch (PackageManager.NameNotFoundException e) {
+            version = "v?";
+        }
+        versionView.setText(version);
     }
 
     private void bindPinLock(View view) {

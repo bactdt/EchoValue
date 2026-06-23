@@ -61,9 +61,12 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          name: "EchoValue ${{ github.ref_name }}"
           files: release/*.apk
           generate_release_notes: true
           body: |
+            Version: ${{ github.ref_name }}
+
             Debug APK built by GitHub Actions.
 
             This APK is intended for testing. It is not production-signed.
