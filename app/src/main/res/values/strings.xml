@@ -177,4 +177,11 @@
 
     <string name="security_placeholder">–</string>
 
+    <string name="autofill_title">自动填充</string>
+    <string name="autofill_enable">启用自动填充</string>
+    <string name="autofill_hint">启用后，在其他 App 登录界面可从 PasswordManager 填充密码。</string>
+    <string name="autofill_enabled_status">已设为默认自动填充服务</string>
+    <string name="autofill_disabled_status">未启用，点击去系统设置开启</string>
+    <string name="autofill_unlock_dataset">解锁 PasswordManager 填充密码</string>
+
 </resources>

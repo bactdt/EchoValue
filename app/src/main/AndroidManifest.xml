@@ -52,6 +52,18 @@
             android:exported="false"
             android:theme="@style/Theme.Keshe" />
 
-            </application>
+        <service
+            android:name=".service.EchoValueAutofillService"
+            android:exported="true"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.autofill"
+                android:resource="@xml/autofill_service_config" />
+        </service>
+
+    </application>
 
 </manifest>
