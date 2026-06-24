@@ -57,8 +57,13 @@ public class UnlockActivity extends AppCompatActivity {
             return;
         }
 
-        if (!hasConfiguredPin()) {
-            returnToLogin();
+        if (!VaultApp.isPinLockAvailable(this)) {
+            if (VaultApp.hasMasterPassword()) {
+                session.setUnlocked(true);
+                goToVault();
+            } else {
+                returnToLogin();
+            }
             return;
         }
 
@@ -170,14 +175,9 @@ public class UnlockActivity extends AppCompatActivity {
         updateDots();
     }
 
-    private boolean hasConfiguredPin() {
-        UserAccount user = dbHelper.findUserByEmail(session.getUserEmail());
-        return user != null && user.getPinHash() != null && !user.getPinHash().trim().isEmpty();
-    }
-
     private void returnToLogin() {
         VaultApp.clearMasterPassword();
-        session.clearAll();
+        session.setUnlocked(false);
         Toast.makeText(this, R.string.unlock_no_pin, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

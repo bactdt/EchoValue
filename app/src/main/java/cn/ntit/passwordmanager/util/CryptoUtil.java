@@ -5,6 +5,8 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -28,6 +30,22 @@ public final class CryptoUtil {
 
     private CryptoUtil() {}
 
+    // 会话内按 salt 缓存已派生的 AES 密钥，避免重复 PBKDF2。
+    // 注：每条凭据的 salt 是独立随机的，所以缓存只对"同一条记录再次解密"生效。
+    private static final int KEY_CACHE_MAX = 32;
+    private static final Map<String, SecretKey> KEY_CACHE = new LinkedHashMap<String, SecretKey>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, SecretKey> eldest) {
+            return size() > KEY_CACHE_MAX;
+        }
+    };
+
+    public static void clearKeyCache() {
+        synchronized (KEY_CACHE) {
+            KEY_CACHE.clear();
+        }
+    }
+
     private static byte[] randomBytes(int n) {
         byte[] b = new byte[n];
         new SecureRandom().nextBytes(b);
@@ -35,11 +53,20 @@ public final class CryptoUtil {
     }
 
     private static SecretKey deriveKey(char[] password, byte[] salt) {
+        String cacheKey = Base64.getEncoder().encodeToString(salt);
+        synchronized (KEY_CACHE) {
+            SecretKey cached = KEY_CACHE.get(cacheKey);
+            if (cached != null) return cached;
+        }
         try {
             PBEKeySpec spec = new PBEKeySpec(password, salt, PBKDF2_ITERATIONS, KEY_BITS);
             SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2);
             byte[] key = skf.generateSecret(spec).getEncoded();
-            return new SecretKeySpec(key, "AES");
+            SecretKey result = new SecretKeySpec(key, "AES");
+            synchronized (KEY_CACHE) {
+                KEY_CACHE.put(cacheKey, result);
+            }
+            return result;
         } catch (Exception e) {
             throw new RuntimeException("密钥派生失败", e);
         }

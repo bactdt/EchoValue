@@ -153,6 +153,8 @@
                 <ImageView
                     android:layout_width="64dp"
                     android:layout_height="64dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_lock"
                     app:tint="@color/md_outline_variant" />
 
@@ -194,6 +196,8 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_password"
                     app:tint="@color/md_primary" />
 
@@ -231,6 +235,8 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/ic_verified_user"
                     app:tint="@color/md_on_primary_container" />
 
@@ -240,9 +246,10 @@
                     android:layout_weight="1" />
 
                 <TextView
+                    android:id="@+id/stat_favorite_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="24"
+                    android:text="0"
                     android:textColor="@color/md_on_primary_container"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -250,7 +257,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/home_stat_2fa"
+                    android:text="@string/home_stat_favorites"
                     android:textColor="@color/md_on_primary_container"
                     android:textSize="12sp" />
             </LinearLayout>
