@@ -5,10 +5,11 @@
 ## 项目结构
 
 ```
-app/src/main/java/cn/it/cast/keshe/
+app/src/main/java/cn/ntit/passwordmanager/
 ├── adapter/          RecyclerView 适配器
 ├── data/             数据库 + 仓库层
 ├── model/            数据模型
+├── service/          自动填充服务（AutofillService）
 ├── util/             工具类（加密、密码生成、会话管理等）
 ├── MainActivity.java 单一宿主 Activity（Fragment 容器）
 ├── VaultFragment.java       密码列表主页
@@ -45,7 +46,7 @@ app/src/main/java/cn/it/cast/keshe/
 2. 检查本地 `~/.gradle/wrapper/` 下是否已有对应版本的 Gradle
 3. 没有则自动下载，有则直接使用
 
-**只要你和同伴都运行 `./gradlew`**，Gradle 版本就完全一致（本项目使用 9.3.1），不需要各自去装特定版本的 Gradle。
+**只要你和同伴都运行 `./gradlew`**，Gradle 版本就完全一致（本项目使用 8.9），不需要各自去装特定版本的 Gradle。
 
 ### 升级 Gradle 版本
 
@@ -76,6 +77,9 @@ gradlew.bat                              # Windows 启动脚本
 
 - AndroidX AppCompat / Material 3 / ConstraintLayout
 - RecyclerView / CardView / CoordinatorLayout
+- ViewPager2
 - AndroidX Biometric（指纹解锁）
+- AndroidX Lifecycle（ProcessLifecycleOwner 前后台监听）
+- AndroidX Security crypto
 - AES-256-GCM 加密（`javax.crypto`）
 - PBKDF2WithHmacSHA256（主密码哈希）
