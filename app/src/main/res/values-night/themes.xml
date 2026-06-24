@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Base.Theme.PasswordManager" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.Keshe" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/md_primary</item>
         <item name="colorOnPrimary">@color/md_on_primary</item>
         <item name="colorPrimaryContainer">@color/md_primary_container</item>
@@ -30,5 +30,5 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="android:forceDarkAllowed">false</item>
     </style>
-    <style name="Theme.PasswordManager" parent="Base.Theme.PasswordManager" />
+    <style name="Theme.Keshe" parent="Base.Theme.Keshe" />
 </resources>

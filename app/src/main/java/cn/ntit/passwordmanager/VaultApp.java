@@ -6,6 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
+
 import cn.ntit.passwordmanager.data.VaultDbHelper;
 import cn.ntit.passwordmanager.model.UserAccount;
 import cn.ntit.passwordmanager.util.CryptoUtil;
@@ -17,8 +21,6 @@ import cn.ntit.passwordmanager.util.SessionManager;
 public class VaultApp extends Application {
 
     private static char[] sMasterPassword;
-    private int startedActivities;
-    private boolean changingConfiguration;
 
     public static void setMasterPassword(char[] password) {
         if (sMasterPassword != null) {
@@ -35,6 +37,10 @@ public class VaultApp extends Application {
         return sMasterPassword != null && sMasterPassword.length > 0;
     }
 
+    public static boolean isMasterPasswordAvailable() {
+        return hasMasterPassword();
+    }
+
     public static void clearMasterPassword() {
         if (sMasterPassword != null) {
             for (int i = 0; i < sMasterPassword.length; i++) sMasterPassword[i] = '\0';
@@ -46,31 +52,24 @@ public class VaultApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityStarted(Activity activity) {
-                if (startedActivities == 0) {
-                    changingConfiguration = false;
-                }
-                startedActivities++;
-            }
 
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(new DefaultLifecycleObserver() {
+            @Override
+            public void onStop(LifecycleOwner owner) {
+                lockForBackground();
+            }
+        });
+
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityResumed(Activity activity) {
                 redirectIfLocked(activity);
             }
 
-            @Override
-            public void onActivityStopped(Activity activity) {
-                changingConfiguration = activity.isChangingConfigurations();
-                startedActivities = Math.max(0, startedActivities - 1);
-                if (startedActivities == 0 && !changingConfiguration) {
-                    lockForBackground();
-                }
-            }
-
             @Override public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
+            @Override public void onActivityStarted(Activity activity) {}
             @Override public void onActivityPaused(Activity activity) {}
+            @Override public void onActivityStopped(Activity activity) {}
             @Override public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
             @Override public void onActivityDestroyed(Activity activity) {}
         });

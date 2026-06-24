@@ -32,6 +32,7 @@ public class VaultFragment extends Fragment {
     private TextView scoreHint;
     private View scoreProgress;
     private TextView statSavedCount;
+    private TextView statFavoriteCount;
     private LinearLayout emptyState;
 
     private final ActivityResultLauncher<Intent> detailLauncher =
@@ -53,10 +54,6 @@ public class VaultFragment extends Fragment {
         bindViews(view);
         wireEvents(view);
         refreshList();
-
-        MainActivityCallback callback = (MainActivityCallback) requireActivity();
-        callback.setToolbarTitle(getString(R.string.nav_vault), true, true);
-        callback.setFabVisible(true);
 
         if (repository.count() == 0) {
             seedSampleCredentials();
@@ -84,6 +81,7 @@ public class VaultFragment extends Fragment {
         scoreHint = view.findViewById(R.id.score_hint);
         scoreProgress = view.findViewById(R.id.score_progress);
         statSavedCount = view.findViewById(R.id.stat_saved_count);
+        statFavoriteCount = view.findViewById(R.id.stat_favorite_count);
         emptyState = view.findViewById(R.id.empty_state);
 
         RecyclerView rv = view.findViewById(R.id.credentials_recycler);
@@ -94,6 +92,13 @@ public class VaultFragment extends Fragment {
     }
 
     private CredentialAdapter adapter;
+
+    private static final int FILTER_ALL = 0;
+    private static final int FILTER_FAVORITES = 1;
+    private static final int FILTER_PASSWORDS = 2;
+    private static final int FILTER_NOTES = 3;
+    private int currentFilter = FILTER_ALL;
+    private String searchQuery = "";
 
     private void launchDetail(Credential cred) {
         Intent it = new Intent(requireContext(), PasswordDetailActivity.class);
@@ -108,29 +113,38 @@ public class VaultFragment extends Fragment {
                 view.findViewById(R.id.chip_passwords),
                 view.findViewById(R.id.chip_notes)
         };
-        for (TextView chip : chips) {
-            chip.setOnClickListener(v -> {
+        int[] filterForChip = { FILTER_ALL, FILTER_FAVORITES, FILTER_PASSWORDS, FILTER_NOTES };
+        for (int i = 0; i < chips.length; i++) {
+            final int filter = filterForChip[i];
+            chips[i].setOnClickListener(v -> {
+                currentFilter = filter;
                 for (TextView c : chips) {
                     c.setTextAppearance(R.style.FilterChipInactive);
                     c.setBackgroundResource(R.drawable.bg_chip_inactive);
                 }
-                v.setBackgroundResource(R.drawable.bg_chip_active);
+                TextView tv = (TextView) v;
+                tv.setTextAppearance(R.style.FilterChipActive);
+                tv.setBackgroundResource(R.drawable.bg_chip_active);
+                refreshList();
             });
         }
     }
 
     public void refreshList() {
         if (repository == null || getView() == null) return;
-        List<Credential> list = repository.list();
-        adapter = new CredentialAdapter(list, repository, cred -> launchDetail(cred));
-        RecyclerView rv = getView().findViewById(R.id.credentials_recycler);
-        rv.setAdapter(adapter);
+        List<Credential> all = repository.list();
 
-        int count = list.size();
-        statSavedCount.setText(String.valueOf(count));
-        emptyState.setVisibility(count == 0 ? View.VISIBLE : View.GONE);
+        // 统计基于全部数据
+        int totalCount = all.size();
+        statSavedCount.setText(String.valueOf(totalCount));
 
-        int score = Math.min(95, 50 + count * 5);
+        int favCount = 0;
+        for (Credential c : all) {
+            if (c.isFavorite()) favCount++;
+        }
+        statFavoriteCount.setText(String.valueOf(favCount));
+
+        int score = Math.min(95, 50 + totalCount * 5);
         scoreValue.setText(String.valueOf(score));
         ViewGroup.LayoutParams lp = scoreProgress.getLayoutParams();
         int width = Math.round(getResources().getDisplayMetrics().widthPixels - 48 * 2);
@@ -142,6 +156,55 @@ public class VaultFragment extends Fragment {
         } else {
             scoreHint.setText(getString(R.string.home_score_warning, Math.max(1, (100 - score) / 10)));
         }
+
+        // 列表根据 chip 过滤
+        List<Credential> filtered = new ArrayList<>();
+        for (Credential c : all) {
+            switch (currentFilter) {
+                case FILTER_FAVORITES:
+                    if (c.isFavorite() && matchesSearch(c)) filtered.add(c);
+                    break;
+                case FILTER_PASSWORDS:
+                    if (c.getUsername() != null
+                            && !c.getUsername().trim().isEmpty()
+                            && matchesSearch(c)) {
+                        filtered.add(c);
+                    }
+                    break;
+                case FILTER_NOTES:
+                    if (c.getNotes() != null
+                            && !c.getNotes().trim().isEmpty()
+                            && matchesSearch(c)) {
+                        filtered.add(c);
+                    }
+                    break;
+                default:
+                    if (matchesSearch(c)) filtered.add(c);
+            }
+        }
+
+        adapter = new CredentialAdapter(filtered, repository, cred -> launchDetail(cred));
+        RecyclerView rv = getView().findViewById(R.id.credentials_recycler);
+        rv.setAdapter(adapter);
+
+        emptyState.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    public void filter(String query) {
+        searchQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        refreshList();
+    }
+
+    private boolean matchesSearch(Credential credential) {
+        if (searchQuery.isEmpty()) return true;
+        return contains(credential.getName(), searchQuery)
+                || contains(credential.getUsername(), searchQuery)
+                || contains(credential.getWebsite(), searchQuery)
+                || contains(credential.getNotes(), searchQuery);
+    }
+
+    private boolean contains(String value, String query) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(query);
     }
 
     private void seedSampleCredentials() {
@@ -157,27 +220,5 @@ public class VaultFragment extends Fragment {
         repository.saveNew("Adobe CC", "julian.smith@work.com",
                 "Ad0be_Creative#2024", "https://adobe.com",
                 "Photoshop + Illustrator 工作订阅");
-    }
-
-    public void filter(String query) {
-        if (repository == null || getView() == null) return;
-        List<Credential> all = repository.list();
-        if (query == null || query.trim().isEmpty()) {
-            adapter = new CredentialAdapter(all, repository, this::launchDetail);
-        } else {
-            String lower = query.toLowerCase().trim();
-            List<Credential> filtered = new ArrayList<>();
-            for (Credential c : all) {
-                if (c.getName().toLowerCase().contains(lower)
-                        || c.getUsername().toLowerCase().contains(lower)
-                        || (c.getWebsite() != null && c.getWebsite().toLowerCase().contains(lower))
-                        || (c.getNotes() != null && c.getNotes().toLowerCase().contains(lower))) {
-                    filtered.add(c);
-                }
-            }
-            adapter = new CredentialAdapter(filtered, repository, this::launchDetail);
-        }
-        RecyclerView rv = getView().findViewById(R.id.credentials_recycler);
-        rv.setAdapter(adapter);
     }
 }

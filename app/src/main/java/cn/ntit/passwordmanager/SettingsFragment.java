@@ -1,8 +1,11 @@
 package cn.ntit.passwordmanager;
 
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +46,7 @@ public class SettingsFragment extends Fragment {
 
         bindUser(view);
         bindPinLock(view);
+        bindAutofill(view);
         bindVersion(view);
         wireEvents(view);
     }
@@ -67,6 +71,38 @@ public class SettingsFragment extends Fragment {
             version = "v?";
         }
         versionView.setText(version);
+    }
+
+    private void bindAutofill(View view) {
+        TextView statusText = view.findViewById(R.id.autofill_status_text);
+        Button enableButton = view.findViewById(R.id.autofill_enable_button);
+        refreshAutofillStatus(statusText, enableButton);
+        enableButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE);
+            intent.setData(Uri.parse("package:" + requireContext().getPackageName()));
+            startActivity(intent);
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getView() == null) return;
+        TextView statusText = getView().findViewById(R.id.autofill_status_text);
+        Button enableButton = getView().findViewById(R.id.autofill_enable_button);
+        if (statusText != null) {
+            refreshAutofillStatus(statusText, enableButton);
+        }
+    }
+
+    private void refreshAutofillStatus(TextView statusText, Button enableButton) {
+        android.view.autofill.AutofillManager afm = requireContext()
+                .getSystemService(android.view.autofill.AutofillManager.class);
+        boolean enabled = afm != null && afm.hasEnabledAutofillServices();
+        statusText.setText(enabled
+                ? R.string.autofill_enabled_status
+                : R.string.autofill_disabled_status);
+        enableButton.setVisibility(enabled ? View.GONE : View.VISIBLE);
     }
 
     private void bindPinLock(View view) {

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. Material 3 with Sentry Core palette. -->
-    <style name="Base.Theme.PasswordManager" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.Keshe" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary palette -->
         <item name="colorPrimary">@color/md_primary</item>
         <item name="colorOnPrimary">@color/md_on_primary</item>
@@ -42,7 +42,7 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 
-    <style name="Theme.PasswordManager" parent="Base.Theme.PasswordManager" />
+    <style name="Theme.Keshe" parent="Base.Theme.Keshe" />
 
     <!-- Typography styles (Roboto Flex weights per design) -->
     <style name="TextAppearance.Keshe.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
